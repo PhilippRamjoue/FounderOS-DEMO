@@ -223,6 +223,30 @@ so they never touch the seeded dev DB.
 
 ---
 
+## Deploying to Coolify
+
+The repo ships a [`Dockerfile`](Dockerfile) and [`docker-compose.coolify.yml`](docker-compose.coolify.yml)
+for self-hosting on a Coolify instance:
+
+1. Push this repo to a git remote Coolify can reach.
+2. In Coolify: **New Resource → Docker Compose** → point at
+   `docker-compose.coolify.yml`.
+3. **Environment Variables** tab → set whichever connector credentials from
+   `.env.example` you want live, plus `FOUNDER_OS_ACCESS_TOKEN` if the
+   instance gets a public domain (unset leaves it open, like local dev — see
+   `lib/access-gate.ts`).
+4. **Domains** tab → set your domain; Coolify wires Traefik automatically.
+5. Deploy. The `founder_os_data` volume mounts at `DATA_DIR=/app/data`, so
+   `data/founder-os.db` persists across redeploys (`lib/paths.ts`). The
+   container always listens on **4100** — Coolify's proxy just needs to know
+   that port, no `PORT` env var required.
+
+Same seed-on-first-touch behaviour as local dev: a fresh volume boots looking
+alive, and connectors report an honest "not configured" until you add
+credentials.
+
+---
+
 ## Note on the demo data
 
 This is a demo build. All names, companies, clients, financial figures, and

@@ -2,9 +2,11 @@ import path from 'node:path';
 
 /**
  * Where writable data (the SQLite files) lives, resolved per deployment target.
- * Platform-agnostic so the same build runs on Vercel, Railway, or locally:
+ * Platform-agnostic so the same build runs on Vercel, Railway, Coolify, or
+ * locally:
  *
- *   DATA_DIR set  -> use it        (Railway mounts a persistent Volume here, e.g. /data)
+ *   DATA_DIR set  -> use it        (Railway Volume, or the Coolify volume
+ *                                   mounted at /app/data — see Dockerfile)
  *   VERCEL set    -> /tmp          (Vercel's serverless FS is read-only elsewhere)
  *   otherwise     -> <cwd>/data    (local dev, checked into the repo)
  */

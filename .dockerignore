@@ -1,0 +1,23 @@
+node_modules/
+.next/
+.next-*/
+data/
+
+# Secrets — never bake into the image; Coolify injects env vars at runtime
+.env
+.env.local
+.env.*.local
+
+# VCS / editor / OS cruft
+.git/
+.github/
+.idea/
+.vscode/
+.DS_Store
+
+# Not needed in the image
+tests/
+*.tsbuildinfo
+.worktrees/
+.playwright-mcp/
+claude code images/

@@ -1,0 +1,50 @@
+# ══════════════════════════════════════════════════════════════════════════
+#  FOUNDER OS – Coolify deployment
+#
+#  1. Push this repo to a git remote Coolify can reach.
+#  2. In Coolify: New Resource → Docker Compose → point at this file.
+#  3. Environment Variables tab → set whichever connector credentials from
+#     .env.example you want live, plus FOUNDER_OS_ACCESS_TOKEN if this
+#     instance gets a public domain (see lib/access-gate.ts). Coolify writes
+#     those into a .env file next to this compose file; env_file below loads
+#     it straight into the container — nothing here needs updating when a
+#     new connector env var is added to .env.example.
+#  4. Domains tab → set your domain. Coolify wires Traefik automatically —
+#     do NOT add routing labels here, only the network label below (it just
+#     tells Traefik which docker network to route through).
+#  5. Deploy. founder_os_data persists data/founder-os.db (SQLite, WAL)
+#     across redeploys — DATA_DIR always wins in lib/paths.ts.
+# ══════════════════════════════════════════════════════════════════════════
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATA_DIR: /app/data
+      PORT: "4100"
+    volumes:
+      - founder_os_data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:4100/',r=>process.exit(0)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    labels:
+      - "traefik.docker.network=coolify"
+    networks:
+      - coolify
+
+networks:
+  coolify:
+    external: true
+    name: coolify
+
+volumes:
+  founder_os_data:
