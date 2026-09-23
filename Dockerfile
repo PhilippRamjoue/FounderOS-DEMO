@@ -1,16 +1,16 @@
 # FOUNDER OS — production image (Coolify / any Docker host).
-# node:22-slim (Debian, glibc) rather than alpine: better-sqlite3 ships
-# prebuilt binaries for glibc, and building on musl would force a slower
-# source compile every time the base image updates.
+# node:22-slim (Debian, glibc) rather than alpine for the final stages:
+# better-sqlite3 ships prebuilt binaries for glibc, and building on musl
+# would force a slower source compile every time the base image updates.
 
 # ---- deps -------------------------------------------------------------------
-FROM node:22-slim AS deps
+# Full node:22 (not -slim) here on purpose: it already ships gcc/make/python3
+# for the rare case npm has to compile better-sqlite3 from source instead of
+# pulling its prebuilt binary, so this stage skips its own apt-get install.
+# That apt step (python3 make g++, ~130s) was pushing total build time past
+# Coolify's remote-command timeout on first deploy — see git history.
+FROM node:22 AS deps
 WORKDIR /app
-# Build tools for the rare case npm has to compile better-sqlite3 from
-# source instead of pulling its prebuilt binary.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      python3 make g++ \
-    && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 RUN npm ci
 
